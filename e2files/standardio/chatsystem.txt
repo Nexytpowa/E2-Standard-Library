@@ -1,0 +1,73 @@
+#Standard chat support, adds command to function handling 
+#updated 10/06/21
+@persist ChatCommands:table ChatCommandsDesc:table ChatCommandsAll:table
+
+if(first())
+{
+	function void register_cmd(ChatCMD:string, FuncName:string, Description:string)
+	{
+		ChatCommands[ChatCMD, string] = FuncName
+		ChatCommandsDesc[ChatCMD, string] = Description
+	}
+	
+	function void register_cmd(ChatCMD:string, FuncName:string)
+	{
+		register_cmd(ChatCMD, FuncName, "No description set for this command.")
+	}
+
+function void register_all_cmd(ChatCMD:string, FuncName:string, Description:string)
+{
+    ChatCommandsAll[ChatCMD, string] = FuncName
+    ChatCommandsDesc[ChatCMD, string] = Description   
+}
+
+function void register_all_cmd(ChatCMD:string, FuncName:string)
+{
+    register_all_cmd(ChatCMD, FuncName, "No description set for this all-player command.")   
+}
+	
+	function void printAllCommands(Args:array)
+	{
+		local Keys = ChatCommandsDesc:keys()
+		for(I = 1, Keys:count())
+		{
+			local CMD = Keys[I, string]
+			local Desc = ChatCommandsDesc[CMD, string]
+			print("'"+CMD+"'"+ " -- "+Desc)
+		}
+	}
+	
+	register_cmd("!commands", "printAllCommands", "Print all available commands.")
+	
+	print(entity():getName()+": Chat system ready! type !commands for a list of commands.")
+	
+    runOnChat(1)      
+}
+
+
+# Chat command handling
+if(chatClk())
+{
+    local Said = lastSaid()
+    local WhoSaid = lastSpoke()
+    local Args = Said:explode(" ")
+	
+	local ChatFunction = Args[1, string]
+    Args:removeString(1)
+    
+    if(lastSpoke() == owner())
+    {
+        if(ChatCommands:exists(ChatFunction))
+        {
+            ChatCommands[ChatFunction, string](Args) 
+        }   
+    }
+    if(ChatCommandsAll:exists(ChatFunction))
+    {
+        ChatCommandsAll[ChatFunction, string](WhoSaid, Args)    
+    }
+	
+
+}
+# Chat command handling
+
